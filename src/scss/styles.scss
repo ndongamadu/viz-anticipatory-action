@@ -6,7 +6,11 @@ html, body {
   height: 100%;
 }
 
-
+body {
+	font-family: 'PT Sans', sans-serif;
+	margin: 0;
+	padding: 0;
+}
 main, .hide {
 	opacity: 0;
 }
@@ -17,9 +21,7 @@ main {
 .container {
 	max-width: 1320px;
 }
-body {
-	font-family: 'Source Sans Pro', sans-serif;
-}
+
 
 #sidebar { 
 	// border-right: 1px solid #6e6c6c9c;
