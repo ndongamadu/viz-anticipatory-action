@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8' />
+    <title>AAP</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link rel='icon' type='image/png' href='https://data.humdata.org/images/icons/hdx.ico' />
+    <link href='https://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet'>
+    
+    <!-- CSS only -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" >
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+        integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+        crossorigin="" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+
+    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    
+    
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <link href='css/styles.css' rel='stylesheet' />
+  </head>
+
+  <body>
+    <div class="loader">
+        <div class="sp sp-circle"></div>
+        Loading data...
+    </div>
+    <main>
+      <div class="container">
+        <h1>Anticipatory Action Pilots </h1>
+        <div class="row">
+          <div class="col-md-10">
+            <p>Please note that this dashboard is under development and intended for forecast exploration only. Feedback and
+              suggestions can be directed to Josée Poirier (josee.poirier@un.org).</p>
+          </div>
+          <div class="col-md-2">
+            <select name="periods" id="selections"></select>
+          </div>
+        </div>    
+        <div class="row">
+          <div class="col-md-4" id="sidebar">
+            <div class="triggers-definition">
+              <h4>Trigger Definition</h4>
+              <h5>Food Insecurity</h5>
+              <p class="definition">
+                At least 20% population of one or more ADMIN1 regions be projected at IPC4+
+                <em>OR</em> At least 30% of ADMIN1 population be projected at IPC3+ AND with an increase by 5 percentage
+                points compared to current
+                state
+              </p>
+      
+              <h5>Drought</h5>
+              <p class="definition">
+                At least 50% probability of below average rainfall from at least two seasonal rainfall forecasts
+                <em>OR</em> Drought named as a driver of the deterioration of the situation in food security by FewsNet or
+                Global IPC
+              </p>
+            </div>
+            <div class="key-message">
+              <!-- <h4>Key Messages</h4>
+              <p></p> -->
+            </div>
+          </div>
+          <div class="col-md-8" id="content">
+            <div id="map"></div>
+            <section class="hide">
+              <button type="button" class="btn btn-default">Show data table</button>
+              <div>
+                <table id="datatable" class="display">
+                  <thead>
+                    <tr></tr>
+                  </thead>
+                </table>
+              </div>
+            </section>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <div class='container'>
+          <!-- <div class='col-12'> -->
+            <a href='https://www.unocha.org' target='_blank'>
+              <img height='30' src='assets/logo-ocha-gray.png'>
+            </a>
+            <a href='https://centre.humdata.org' target='_blank'>
+              <img height='38' src='assets/logo-centre-gray.png'>
+            </a>
+          <!-- </div> -->
+      </div>
+    </footer>
+    <script type='text/javascript' src='js/bundle.js'></script>
+  </body>
+</html>
