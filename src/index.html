@@ -13,6 +13,7 @@
         integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
         crossorigin="" />
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
     <script src="https://d3js.org/d3.v5.js"></script>
     <script src="https://d3js.org/topojson.v1.min.js"></script>
@@ -22,6 +23,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
     <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <link href='css/styles.css' rel='stylesheet' />
   </head>
 
@@ -32,42 +34,60 @@
     </div>
     <main>
       <div class="container">
-        <h1>Anticipatory Action Pilots </h1>
         <div class="row">
-          <div class="col-md-10">
-            <p>Please note that this dashboard is under development and intended for forecast exploration only. Feedback and
-              suggestions can be directed to Josée Poirier (josee.poirier@un.org).</p>
-          </div>
-          <div class="col-md-2">
-            <select name="periods" id="selections"></select>
-          </div>
-        </div>    
+          <!-- <h1>Anticipatory Action Pilots </h1> -->
+        </div>
         <div class="row">
           <div class="col-md-4" id="sidebar">
-            <div class="triggers-definition">
-              <h4>Trigger Definition</h4>
-              <h5>Food Insecurity</h5>
-              <p class="definition">
-                At least 20% population of one or more ADMIN1 regions be projected at IPC4+
-                <em>OR</em> At least 30% of ADMIN1 population be projected at IPC3+ AND with an increase by 5 percentage
-                points compared to current
-                state
+            <h2>Anticipatory Action Pilots </h2>
+            <div id="tutoriel">
+              <p>
+                <h6>About</h6>
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolor voluptatem similique alias doloribus delectus tenetur architecto soluta eligendi labore, 
+                harum dolores blanditiis possimus expedita velit numquam repudiandae totam voluptas aspernatur?
+                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Excepturi iure rem ab. Et architecto nobis ducimus distinctio quam! 
+                Ex illum culpa aspernatur provident perspiciatis vel ipsam? Aliquam repudiandae illo ab.
               </p>
-      
-              <h5>Drought</h5>
-              <p class="definition">
-                At least 50% probability of below average rainfall from at least two seasonal rainfall forecasts
-                <em>OR</em> Drought named as a driver of the deterioration of the situation in food security by FewsNet or
-                Global IPC
+              <p>
+                <h6>Tutoriel</h6>
+                Tutoriel Lorem ipsum dolor sit amet consectetur adipisicing elit. Earum laudantium exercitationem possimus ad fugit fuga
+                quibusdam iusto soluta.
+                Facilis, odio nisi? Ea, tempora! Suscipit obcaecati eveniet blanditiis libero, non ipsum.
+                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sed in accusantium cum totam adipisci? Molestias quaerat
+                recusandae amet nihil aliquam cum corporis in,
+                beatae sapiente facere excepturi ipsam rem ducimus
+              </p>
+              <p>
+                <h6>More resources</h6>
+                Click on the links below to access the forecasts published by agencies.
+                <ul>
+                  <li><a href="https://fews.net/east-africa/ethiopia/food-security-outlook/october-2020" target="blank">Food Insecurity: FewsNet</a></li>
+                  <li><a href="http://www.ipcinfo.org/ipc-country-analysis/details-map/en/c/1152818/?iso3=ETH" target="blank">Food Insecurity: Global IPC</a></li>
+                  <li><a href="https://iri.columbia.edu/our-expertise/climate/forecasts/seasonal-climate-forecasts/" target="blank">Rainfall: IRI</a></li>
+                  <li><a href="https://www.icpac.net/seasonal-forecast/" target="blank">Rainfall: ICPAC</a></li>
+                  <li><a href="https://blog.chc.ucsb.edu/?p=898" target="blank">Rainfall: CHC</a></li>
+                  <li><a href="https://www.cpc.ncep.noaa.gov/products/NMME/prob/PROBprate.S.html" target="blank">Rainfall: NMME</a></li>
+                  <li><a href="http://www.ethiomet.gov.et/other_forecasts/seasonal_forecast" target="blank">Rainfall: Ethiopian NMA</a></li>
+                </ul>
               </p>
             </div>
-            <div class="key-message">
-              <!-- <h4>Key Messages</h4>
-              <p></p> -->
+            <div class="row nodisplay">
+              <div class="col-md-6">
+                <input name="datepicker" type="text" id="datepicker">
+              </div>
+              <div class="col-md-6 noright">
+                <select name="datasources" id="source-selections"></select>
+              </div>
             </div>
+
+            <div class="triggers-definition nodisplay"></div>
+
+            <div class="key-message nodisplay"></div>
           </div>
           <div class="col-md-8" id="content">
             <div id="map"></div>
+            <p class="small">The boundaries and names shown and the designations used on this map do not imply official endorsement
+              or acceptance by the United Nations.</p>
             <section class="hide">
               <button type="button" class="btn btn-default">Show data table</button>
               <div>
@@ -93,6 +113,6 @@
           <!-- </div> -->
       </div>
     </footer>
-    <script type='text/javascript' src='js/bundle.min.js'></script>
+    <script type='text/javascript' src='js/bundle.js'></script>
   </body>
 </html>
