@@ -1074,7 +1074,8 @@ html, body {
 body {
   font-family: 'PT Sans', sans-serif;
   margin: 0;
-  padding: 0; }
+  padding: 0;
+  font-size: 14px; }
 
 main, .hide {
   opacity: 0; }
@@ -1085,40 +1086,70 @@ main {
 .container {
   max-width: 1320px; }
 
-#sidebar {
-  padding-right: 0; }
-
 #content {
-  padding-left: 10px;
-  margin-bottom: 20px; }
+  padding-top: 10px; }
+
+.nodisplay {
+  opacity: 0; }
+
+h6 {
+  text-align: justify;
+  font-weight: 600; }
 
 .triggers-definition {
-  background: #EEEEEE;
   padding: 5px; }
   .triggers-definition h4 {
-    font-size: 16px;
     color: #007CE0;
     text-transform: uppercase; }
   .triggers-definition h5 {
-    font-size: 14px;
     color: #1EBFB3; }
-  .triggers-definition .definition {
-    font-family: 'Gotham-Light', sans-serif;
-    font-size: 12px; }
 
-#selections {
+#tutoriel {
+  text-align: justify; }
+
+.nopadding {
+  padding: 0; }
+
+.noright {
+  padding-left: 15px;
+  padding-right: 0; }
+
+.small {
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: 5px; }
+
+#selection {
   background-color: #FFF;
   border-color: #FFF;
   border-radius: 8px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-  height: 40px;
+  height: 34px;
   white-space: pre-wrap;
   width: 100%; }
+
+#source-selections {
+  display: block;
+  background-color: #FFF;
+  height: 34px;
+  white-space: pre-wrap;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-left: 10px; }
+
+#datepicker {
+  display: block;
+  background-color: #FFF;
+  height: 34px;
+  white-space: pre-wrap;
+  width: 100%;
+  margin-bottom: 10px;
+  padding-left: 10px; }
 
 #map {
   position: relative;
   width: 100%;
-  height: 550px; }
+  height: 600px; }
 
 .info {
   padding: 6px 8px;
@@ -1135,25 +1166,27 @@ main {
 .key-message h4 {
   padding-top: 10px; }
 
+p {
+  text-align: justify; }
+
 .btn {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding-top: 10px;
+  margin-top: 5px;
   background-color: #FFF;
-  border-color: #FFF;
-  border-radius: 8px;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
   height: 40px;
   white-space: pre-wrap;
-  width: 250px; }
+  width: 250px;
+  font-size: 14px; }
 
 #datatable {
   width: 100%;
   margin-top: 20px; }
   #datatable thead tr {
-    text-align: left; }
+    text-align: right; }
     #datatable thead tr th:last-child {
       min-width: 112px; }
+  #datatable tbody tr td {
+    text-align: right; }
 
 footer {
   background-color: #353535;

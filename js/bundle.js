@@ -162,29 +162,33 @@ function getColor(adm1) {
     return clr;
 } //getColor
 let globalSettingsUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkpUZ6NCrL8qPXpPGs1ePGf9E44PeiVRcaPvTOvFR5EdizJ7pzyxAaFj-V7NHJP0q6R5KwUfYszpgd/pub?gid=0&single=true&output=csv';
-
-let ethiopiaFSDataUrl = 'https://raw.githubusercontent.com/OCHA-DAP/pa-anticipatory-action/main/dashboard/data/foodinsecurity/ethiopia_foodinsec_trigger.csv';
-let somaliaFSDataUrl = 'https://raw.githubusercontent.com/OCHA-DAP/pa-anticipatory-action/main/dashboard/data/foodinsecurity/somalia_foodinsec_trigger.csv';
+let staticDataUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRkpUZ6NCrL8qPXpPGs1ePGf9E44PeiVRcaPvTOvFR5EdizJ7pzyxAaFj-V7NHJP0q6R5KwUfYszpgd/pub?gid=1361707963&single=true&output=csv';
 
 let ethiopiaAdm1 = 'data/ethiopia.json';
 let somaliaAdm1 = 'data/somalia.json';
 let geodata = 'data/regions.json';
 
 let globalSettings,
+    staticData,
     dataDictionary = {};
 
 let dateRanges = [],
     selectedDate;
 
+    let datePickeur;
+
 let countryAdm1,
     countryFSData,
+    globalCountryFSData,
     countryRainfallData,
-    keyMessages;
+    globalCountryRainfallData;
 
 let dTable,
   dataType;
 
 let defaultDataSource;
+
+let pickDate;
 
 let map,
     regionLayer;
@@ -192,33 +196,19 @@ let geomData;
 
 
 var hideTable = true;
-
+var nonDisplay = 1;
 
 $( document ).ready(function() {
 
   function getData() {
     Promise.all([
       d3.json(geodata),
-      d3.csv(globalSettingsUrl)
-      // d3.json(ethiopiaAdm1),
-      // d3.json(somaliaAdm1),
-      // d3.csv(ethiopiaDataUrl),
-      // d3.csv(somaliaDataUrl)
+      d3.csv(globalSettingsUrl),
+      d3.csv(staticDataUrl)
     ]).then(function(data){
       geomData = topojson.feature(data[0], data[0].objects.regions);
-      
       globalSettings = data[1];
-      data[1].forEach(element => {
-        // console.log(element);
-        dateRanges.includes(element['Date']) ? '' : dateRanges.push(element['Date']);
-      });
-
-      d3.select("#selections")
-        .selectAll("option")
-        .data(dateRanges)
-        .enter().append("option")
-        .text(function (d) { return d; })
-        .attr("value", function (d) { return d; });
+      staticData = data[2];
 
       generateMap();
       
@@ -226,7 +216,6 @@ $( document ).ready(function() {
       $('.loader').hide();
       $('main, footer').css('opacity', 1);
     });
-    
 
   } //getData
 
@@ -239,25 +228,25 @@ $( document ).ready(function() {
 function mapClicked(e) {
   adm1Layer != undefined ? map.removeLayer(adm1Layer) : '';
   legend != undefined ? map.removeControl(legend) : null;
+  pickDate != undefined ? pickDate = null : '';
+
   cleanDataTable();
   dataType = "food_insec";
-  $('.hide').css('opacity', 1);
 
-  var layer = e.target;
-  clickedCountry = layer.feature.properties.admin0Name;
-  selectedDate = $('#selections').val();
+  clickedCountry = e.target.feature.properties.admin0Name;
+
   var adm1Url,
       fsUrl,
       rainfUrl;
-  globalSettings.forEach(element => {
-    if (element['Date'] == selectedDate && element['Countries'] == clickedCountry) {
-      adm1Url = element['Adm1 data Link'];
-      fsUrl = element['Data link'];
-      rainfUrl = element['Rainfall data link'];
-      keyMessages = element['Key Messages'];
-      defaultDataSource = element['Default Source'];
+  
+  staticData.forEach(element => {
+    if (element['country'] == clickedCountry) {
+      fsUrl = element['FS data url'];
+      rainfUrl = element['Rainfall data url'];
+      // adm1Url = element
     }
   });
+
   // a supprimer apres 
   clickedCountry == "Ethiopia" ? adm1Url = "data/ethiopia.json" : adm1Url = "data/somalia.json" ;
   //
@@ -268,16 +257,37 @@ function mapClicked(e) {
   ]).then(function(data){
     clickedCountry == 'Ethiopia' ? countryAdm1 = topojson.feature(data[0], data[0].objects.ethiopia) :
       clickedCountry == 'Somalia' ? countryAdm1 = topojson.feature(data[0], data[0].objects.somalia) : '';
+   
+    data[1].forEach(element => {
+      element['ML1_3p'] = Number(element['ML1_3p']).toFixed(2);
+      element['perc_ML1_3p'] = Number(element['perc_ML1_3p']).toFixed(2);
+    });
+    globalCountryFSData = data[1];
+    globalCountryRainfallData = data[2];
 
-    countryFSData = data[1].filter(function(d) {
+    var dataSourcesArr = [];
+    globalCountryFSData.forEach(element => {
+      dateRanges.includes(element['date']) ? '' : dateRanges.push(element['date']);
+      dataSourcesArr.includes(element['source']) ? '' : dataSourcesArr.push(element['source']);
+    });
+
+    // Date picker
+    generateDatePicker(dateRanges);
+    generateDataSourceOptions(dataSourcesArr);
+
+    defaultDataSource = $('#source-selections').val();
+
+    countryFSData = globalCountryFSData.filter(function(d) {
       return (d['date'] == selectedDate && d['source'] == defaultDataSource);
       });
-    countryRainfallData = data[2].filter(function (d) {
-      return d['pred_date'] == "2020-10-16" ;
+
+    countryRainfallData = globalCountryRainfallData.filter(function (d) {
+      return d['pred_date'] == selectedDate ;
     });
-    // getPeriodeRanges();
+    
+
     getTriggerRegions();
-    generateKeyMessage();
+    generateStaticHTML();
     
 
     adm1Layer = L.geoJSON(countryAdm1, {
@@ -301,12 +311,21 @@ function mapClicked(e) {
 
     $("input[name='optradio']").on('change', function () {
       dataType = $('input[name="optradio"]:checked').val();
+      updateSelects();
       updateMapLayer();
       !hideTable ? generateDataTable() : null;
 
     });
 
   });
+
+  if (nonDisplay == 1) {
+    $('#tutoriel').html('');
+    $('.nodisplay').css({'opacity': 1, 'transition': 'opacity 2s ease'});
+    nonDisplay += 1;
+  }
+  $('.hide').css({ 'opacity': 1, 'transition': 'opacity 2s ease' });
+
 } //mapClicked
 
 function updateMapLayer() {
@@ -314,13 +333,52 @@ function updateMapLayer() {
   choroplethMap();
 }//updateMapLayer
 
+
+function updateSelects() {
+
+  var selectPromise = new Promise(function(resolve){
+    var opts = [];
+    globalCountryFSData.forEach(element => {
+      opts.includes(element['source']) ? '' : opts.push(element['source']);
+    });
+    resolve(opts);
+  });
+
+  var fsPromise = new Promise(function(resolve) {
+    var datesArr = [];
+    globalCountryFSData.forEach(element => {
+      datesArr.includes(element['date']) ? '' : datesArr.push(element['date']);
+    });
+    resolve(datesArr);
+  });
+
+  var rainfallPromise = new Promise(function (resolve) {
+    var datesArr = [];
+    globalCountryRainfallData.forEach(element => {
+      datesArr.includes(element['date']) ? '' : datesArr.push(element['date']);
+    });
+    resolve(datesArr);
+  });
+
+  var thePromise = dataType == 'rainfall' ? rainfallPromise : fsPromise;
+
+  Promise.all([thePromise, selectPromise]).then(function(data){
+    generateDatePicker(data[0]);
+    generateDataSourceOptions(data[1]);
+  });
+} //updateSelects
+
 //Get and set for the selected country the period dropdown with the more recent date selected by default
-function getPeriodeRanges(params) {
+function getPeriodeRanges() {
   var dates = [];
-  countryData.forEach(element => {
+  var data = clickedCountry == "Ethiopia" ? ethiopiaFSData : somaliaFSData;
+  data.forEach(element => {
     dates.includes(element['date']) ? '' : dates.push(element['date']);
   });
+  return dates;
 } //getPeriodeRanges
+
+
 
 // Get trigger regions for Food Insecurity data
 function getTriggerRegions(params) {
@@ -336,21 +394,96 @@ function getTriggerRegions(params) {
   }
 }//getTriggerRegions
 
-function generateKeyMessage() {
-  // $('.key-message').html(""); tu peux toujours vider avant de recreer
+
+function generateDataSourceOptions(arr) {
+  var options = '';
+
+  if (dataType == 'rainfall') {
+    for (let i = 0; i < arr.length; i++) {
+      options += '<option value="' + arr[i] + '" disabled>' + arr[i] + '</option>'
+    }
+
+  } else {
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] == 'FewsNet' ? options += '<option value="' + arr[i] + '" selected>' + arr[i] + '</option>' :
+        options += '<option value="' + arr[i] + '">' + arr[i] + '</option>';
+    }
+  }
+
+  $('#source-selections').html(options);
+} //generateDataSourceOptions
+
+function generateDatePicker(validDatesArr) {
+  pickDate != undefined ? $('#datepicker').datepicker('destroy') : null;
+
+  var maxDate = d3.max(validDatesArr, function (d) { return d; }),
+    minDate = d3.min(validDatesArr, function (d) { return d; });
+  pickDate = $('#datepicker').datepicker({
+    showButtonPanel: true,
+    dateFormat: 'yy-mm-dd',
+    minDate: minDate,
+    maxDate: maxDate,
+    beforeShowDay: function valideDate(date) {
+      var year = date.getFullYear();
+      var day = ("0" + date.getDate()).slice(-2)
+      var month = ("0" + (date.getMonth() + 1)).slice(-2)
+
+      var testDate = year + '-' + month + '-' + day;
+
+      if (validDatesArr.includes(testDate)) {
+        return day;
+      } else {
+        return false;
+      }
+    }
+  });
+  selectedDate = maxDate;
+  $("#datepicker").datepicker("setDate", maxDate);
+} //generateDatePicker
+
+function generateStaticHTML() {
+  var food_insec_def,
+      drought_def,
+      keyMessages;
+
+  var datesArr = ['default'];
+  globalSettings.forEach(element => {
+    datesArr.includes(element['Date']) ? null : datesArr.push(element['Date']);
+  });
+  if (datesArr.includes(selectedDate)) {
+    globalSettings.forEach(element => {
+      (element['Date'] == selectedDate && element['Countries'] == clickedCountry) ? keyMessages = element['Key Messages'] : null;
+    });
+  } else {
+    var f = globalSettings.filter(function (d) { return (d['Date'] == 'default' && d['Countries'] == clickedCountry) ;})
+    keyMessages = f[0]['Key Messages'];
+  }
+  staticData.forEach(element => {
+    if (element['country'] == clickedCountry) {
+      food_insec_def = element['FS trigger definition'];
+      drought_def = element['Rainfall trigger definition'];
+    }
+  });
+  // triggers definition 
+  var definitions = '<h4>Trigger definition</h4><h5>Food Insecurity</h5>';
+  definitions += '<p>' + food_insec_def + '</p>' 
+    + '<h5>Drought</h5>'
+    + '<p>' + drought_def + '</p>';
+
+  $('.triggers-definition').html(definitions);
   $('.key-message').html("");
   var html = '<h4> Key Message</h4><p>' + keyMessages +'</p>';
   $('.key-message').html(html);
 } //generateKeyMessage
 
 function generateDataTable() {
-  var heads = dataType == 'food_insec' ? ["Source", "Admin1", "IPC3+", "Proj_IPC3+", "Change_IPC3+", "Proj_IPC4+", "Trigger_met"]:
+  var heads = dataType == 'food_insec' ? ["Date", "Admin1", "Proj_IPC3+", "Change_IPC3+", "Proj_IPC4+", "Trigger_met"]:
     dataType == 'rainfall' ? ["Admin1", "Date", "Pred_date", "Pred_date_end", "Threshold(%)", "Threshold Reached"] : null;
   
   var fsPromise = new Promise(function (resolve, reject) {
     var dataFSp = [];
     countryFSData.forEach(element => {
-      dataFSp.push([element['source'], element['ADMIN1'], element['ML1_3p'], element['perc_ML1_3p'], element['ML1_4p'], element['perc_ML2_4'], element['threshold_reached_ML1']]);
+      dataFSp.push([element['date'], element['ADMIN1'], element['perc_ML1_3p'], element['ML1_4p'], element['perc_ML2_4'], element['threshold_reached_ML1']]);
     });
     resolve(dataFSp)
   });
@@ -381,7 +514,10 @@ function generateDataTable() {
       $('#datatable').dataTable().fnDraw();
     } else {
       dTable = $('#datatable').DataTable({
-        data: []
+        data: [],
+        "bFilter": false,
+        "bLengthChange": false,
+        "pageLength": 20,
       });
     }
     $('#datatable').dataTable().fnAddData(data[0]);
@@ -402,12 +538,12 @@ $('.btn').on('click', function () {
   if (hideTable) {
     generateDataTable();
     $('.btn').text("Hide table");
-    $('#datatable').css('opacity', 1);
+    $('#datatable').css({ 'opacity': 1, 'transition': 'opacity 2s' });
     hideTable = false;
   } else {
     cleanDataTable();
     $('.btn').text("Show data table");
-    $('#datatable').css('opacity', 0);
+    $('#datatable').css({ 'opacity': 0, 'transition': 'opacity 2s' });
     hideTable = true;
   }
 });
@@ -416,6 +552,36 @@ $('#selections').on('change', function(){
   resetGlobalMap();
 });
 
+// date picker date changed
+$("#datepicker").on('change', function(d){
+  selectedDate = $('#datepicker').val();
+  if (dataType == 'food_insec') {
+    //update food insecu country data
+    countryFSData = globalCountryFSData.filter(function (d) {
+      return (d['date'] == selectedDate && d['source'] == defaultDataSource);
+    });
+  } else {
+    //update rainfall country data
+    countryRainfallData = globalCountryRainfallData.filter(function (d) {
+      return d['date'] == selectedDate;
+    });
+  }
+  
+  updateMapLayer();
+  !hideTable ? generateDataTable() : null;
+});
+
+$('#source-selections').on('change', function(d){
+  defaultDataSource = $('#source-selections').val();
+  selectedDate = $('#datepicker').val();
+
+  countryFSData = globalCountryFSData.filter(function (d) {
+    return (d['date'] == selectedDate && d['source'] == defaultDataSource);
+  });
+
+  updateMapLayer();
+  !hideTable ? generateDataTable() : null;
+});
 
 function resetGlobalMap() {
   //remove adm1Layer
