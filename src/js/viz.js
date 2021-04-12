@@ -87,7 +87,7 @@ function mapClicked(e) {
     }
   });
   // a supprimer apres 
-  clickedCountry == "Ethiopia" ? adm1Url = "data/eth.json" : adm1Url = "data/som.json" ;
+  // clickedCountry == "Ethiopia" ? adm1Url = "data/eth.json" : adm1Url = "data/som.json" ;
   //
   Promise.all([
     d3.json(adm1Url),
