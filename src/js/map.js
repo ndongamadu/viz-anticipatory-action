@@ -5,6 +5,8 @@ var adm1Layer ;
 
 var clickedCountry ;
 
+var adminUnitLevel = 'adm1';
+
 var triggerRegionsList = [];
 
 var mapAdm0Color = '#F2645A',
@@ -43,8 +45,9 @@ function generateMap() {
     };
 
     info.updateFromAdm1 = function (props) {
+        var name = adminUnitLevel == 'adm1' ? props.admin1Name : props.admin0Name;
         var html = '';
-        props ? html = '<h4>' + props.admin1Name + '</h4>' : '';
+        props ? html = '<h4>' + name + '</h4>' : '';
         this._div.innerHTML = html;
 
     };
@@ -89,8 +92,9 @@ function styleLayers(feature) {
 }
 
 function styleAdm1Layer(feature) {
+    var obj = adminUnitLevel == 'adm1' ? feature.properties.admin1Name : feature.properties.admin0Name ;
     return {
-        fillColor: getColor(feature.properties.admin1Name),
+        fillColor: getColor(obj),
         weight: 1.5,
         // color: '#666',
         // dashArray: '',
@@ -116,10 +120,10 @@ function resetHighlight(e) {
 
 
 function choroplethMap(feature) {
-    // console.log(adm1Layer); test existence adm1Layer
     adm1Layer.eachLayer(function(layer){
+        var obj = adminUnitLevel == 'adm1' ? layer.feature.properties.admin1Name : layer.feature.properties.admin0Name;
         layer.setStyle({
-            fillColor: getColor(layer.feature.properties.admin1Name),
+            fillColor: getColor(obj),
             weight: 1.5,
             // color: '#666',
             // dashArray: '',

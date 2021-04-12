@@ -66,8 +66,10 @@ function mapClicked(e) {
   adm1Layer != undefined ? map.removeLayer(adm1Layer) : '';
   legend != undefined ? map.removeControl(legend) : null;
   pickDate != undefined ? pickDate = null : '';
+  dateRanges = [];
 
   cleanDataTable();
+  $('.btn').text("Show data table");
   dataType = "food_insec";
 
   clickedCountry = e.target.feature.properties.admin0Name;
@@ -80,20 +82,19 @@ function mapClicked(e) {
     if (element['country'] == clickedCountry) {
       fsUrl = element['FS data url'];
       rainfUrl = element['Rainfall data url'];
-      // adm1Url = element
+      adm1Url = element['Geodata url'];
+      adminUnitLevel = element['Admin Unit Level'];
     }
   });
-
   // a supprimer apres 
-  clickedCountry == "Ethiopia" ? adm1Url = "data/ethiopia.json" : adm1Url = "data/somalia.json" ;
+  clickedCountry == "Ethiopia" ? adm1Url = "data/eth.json" : adm1Url = "data/som.json" ;
   //
   Promise.all([
     d3.json(adm1Url),
     d3.csv(fsUrl),
     d3.csv(rainfUrl)
   ]).then(function(data){
-    clickedCountry == 'Ethiopia' ? countryAdm1 = topojson.feature(data[0], data[0].objects.ethiopia) :
-      clickedCountry == 'Somalia' ? countryAdm1 = topojson.feature(data[0], data[0].objects.somalia) : '';
+    countryAdm1 = topojson.feature(data[0], data[0].objects.geom) ;
    
     data[1].forEach(element => {
       element['ML1_3p'] = Number(element['ML1_3p']).toFixed(2);
@@ -117,7 +118,6 @@ function mapClicked(e) {
     countryFSData = globalCountryFSData.filter(function(d) {
       return (d['date'] == selectedDate && d['source'] == defaultDataSource);
       });
-
     countryRainfallData = globalCountryRainfallData.filter(function (d) {
       return d['pred_date'] == selectedDate ;
     });
@@ -221,9 +221,15 @@ function getPeriodeRanges() {
 function getTriggerRegions(params) {
   triggerRegionsList = [];
   if (dataType == "food_insec") {
-    countryFSData.forEach(element => {
-      element['threshold_reached_ML1'] == "True" ? triggerRegionsList.push(element['ADMIN1']) : '';
-    });
+    if (adminUnitLevel == 'adm1') {
+      countryFSData.forEach(element => {
+        element['threshold_reached_ML1'] == "True" ? triggerRegionsList.push(element['ADMIN1']) : '';
+      });
+    } else {
+      countryFSData.forEach(element => {
+        (element['threshold_reached_ML1'] == "True" || element['threshold_reached_ML1'] ==  0)  ? triggerRegionsList.push(element['ADMIN0']) : '';
+      });
+    }
   } else if (dataType == "rainfall") {
     countryRainfallData.forEach(element => {
       element['threshold_reached'] == "0" ? triggerRegionsList.push(element['ADM1_EN']) : '';
@@ -314,13 +320,13 @@ function generateStaticHTML() {
 } //generateKeyMessage
 
 function generateDataTable() {
-  var heads = dataType == 'food_insec' ? ["Date", "Admin1", "Proj_IPC3+", "Change_IPC3+", "Proj_IPC4+", "Trigger_met"]:
+  var heads = dataType == 'food_insec' ? ["Date", "Source", "Proj_IPC3+", "Change_IPC3+", "Proj_IPC4+", "Trigger_met"]:
     dataType == 'rainfall' ? ["Admin1", "Date", "Pred_date", "Pred_date_end", "Threshold(%)", "Threshold Reached"] : null;
   
   var fsPromise = new Promise(function (resolve, reject) {
     var dataFSp = [];
     countryFSData.forEach(element => {
-      dataFSp.push([element['date'], element['ADMIN1'], element['perc_ML1_3p'], element['ML1_4p'], element['perc_ML2_4'], element['threshold_reached_ML1']]);
+      dataFSp.push([element['date'], element['source'], element['perc_ML1_3p'], element['ML1_4p'], element['perc_ML2_4'], element['threshold_reached_ML1']]);
     });
     resolve(dataFSp)
   });
